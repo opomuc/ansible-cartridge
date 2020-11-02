@@ -44,6 +44,25 @@
   tags: always
   when: cartridge_package_path is regex('\.tar\.gz$')
 
+#   Create folders
+- name: Create userspace folders
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode | default('0755') }}"
+  loop:
+    - {path: "{{ bin_dir }}"}
+    - {path: "{{ data_dir }}"}
+    - {path: "{{ conf_dir }}"}
+    - {path: "{{ instance_run_path }}", mode: 777}
+    - {path: "{{ instance_systemd_path }}"}
+    - {path: "{{ instance_work_dir }}"}
+    - {path: "{{ log_dir }}"}
+    - {path: "{{ run_dir }}/{{ cartridge_app_name }}"}
+  any_errors_fatal: true
+  notify:
+    - reload-supervisor-daemon
+
 # Rewrites cartridge_app_name from package info
 - name: Install package
   include_tasks: install_package.yml

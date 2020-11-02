@@ -15,18 +15,22 @@
 
 - name: Restart supervisor instances
   supervisorctl:
-    name: "{{ cartridge_app_name }}:{{ inventory_hostname }}"
+    name: "{{ cartridge_app_name }}:"
     state: present
   listen:
     - restart-instance
     - reload-supervisor-daemon
   tags: cartridge-instances
+  when: >-
+    inventory_hostname in hostvars | get_one_not_expelled_instance_for_machine(play_hosts)
 
 - name: Restart supervisor instances
   supervisorctl:
-    name: "{{ cartridge_app_name }}:{{ inventory_hostname }}"
+    name: "{{ cartridge_app_name }}:"
     state: restarted
   listen:
     - restart-instance
     - reload-supervisor-daemon
   tags: cartridge-instances
+  when: >-
+    inventory_hostname in hostvars | get_one_not_expelled_instance_for_machine(play_hosts)

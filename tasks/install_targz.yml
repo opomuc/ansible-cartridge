@@ -9,23 +9,6 @@
     groups: "{{ instance_group }}"
     append: yes
 
-#   Create folders
-- name: Create userspace folders
-  file:
-    path: "{{ item.path }}"
-    state: directory
-    mode: "{{ item.mode | default('0755') }}"
-  loop:
-    - {path: "{{ bin_dir }}{{ cartridge_app_name }}"}
-    - {path: "{{ data_dir }}"}
-    - {path: "{{ conf_dir }}"}
-    - {path: "{{ instance_run_path }}", mode: 777}
-    - {path: "{{ instance_systemd_path }}"}
-    - {path: "{{ instance_work_dir }}"}
-    - {path: "{{ log_dir }}"}
-    - {path: "{{ run_dir }}/{{ cartridge_app_name }}"}
-  any_errors_fatal: true
-
 - name: Create a package directory
   file:
     path: "{{ apps_dir }}"
@@ -43,7 +26,7 @@
 - name: Create a symlink to the package folder
   file:
     src: "{{ apps_dir }}/{{ cartridge_app_name }}"
-    dest: "{{ bin_dir }}{{ cartridge_app_name }}"
+    dest: "{{ bin_dir }}"
     state: link
     force: true
   any_errors_fatal: true
