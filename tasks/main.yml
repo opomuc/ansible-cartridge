@@ -41,6 +41,10 @@
     log_dir: '/var/log/tarantool/{{ cartridge_app_name }}'
     instance_log_file: '/var/log/tarantool/{{ cartridge_app_name }}/{{ inventory_hostname }}.log'
     bin_dir: '{{ bin_dir }}{{ cartridge_app_name }}'
+    supervisor_run: '{{ supervisor_home }}/run'
+    supervisor_log: '{{ supervisor_home }}/supervisord.log'
+    supervisor_socket: '{{ supervisor_home }}/run/supervisord.sock'
+    supervisor_unit_dir: '{{ supervisor_home }}/units'
   tags: always
   when: cartridge_package_path is regex('\.tar\.gz$')
 
@@ -58,7 +62,8 @@
     - {path: "{{ instance_systemd_path }}"}
     - {path: "{{ instance_work_dir }}"}
     - {path: "{{ log_dir }}"}
-    - {path: "{{ run_dir }}/{{ cartridge_app_name }}"}
+    - {path: "{{ run_dir }}{{ cartridge_app_name }}"}
+  become: false
   any_errors_fatal: true
   notify:
     - reload-supervisor-daemon
@@ -78,6 +83,7 @@
 
 # Restart instances and reload systemd-daemon if required
 - meta: flush_handlers
+  become: false
 
 # - name: Wait for instance to be started
 #   cartridge_check_instance_started:
