@@ -21,6 +21,9 @@
     - {path: "{{ conf_dir }}"}
     - {path: "{{ instance_run_path }}", mode: 777}
     - {path: "{{ instance_systemd_path }}"}
+    - {path: "{{ instance_work_dir }}"}
+    - {path: "{{ log_dir }}"}
+    - {path: "{{ run_dir }}/{{ cartridge_app_name }}"}
   any_errors_fatal: true
 
 - name: Create a package directory
@@ -45,20 +48,38 @@
     force: true
   any_errors_fatal: true
 
-- name: Create an app@.service file
-  template:
-    src: app@.service.j2
-    dest: "{{ instance_systemd_path }}{{ instance_systemd_unit_file }}"
-  any_errors_fatal: true
+# - name: Create an app@.service file
+#   template:
+#     src: app@.service.j2
+#     dest: "{{ instance_systemd_path }}{{ instance_systemd_unit_file }}"
+#   any_errors_fatal: true
 
-- name: Copy an unit-file to /etc/systemd/system/
-  become: true
-  copy:
-    remote_src: true
-    src: "{{ instance_systemd_path }}{{ instance_systemd_unit_file }}"
-    dest: "/etc/systemd/system/{{ instance_systemd_unit_file }}"
+- vars:
+    programs: '{{ hostvars.values() | list }}'
+  debug:
+    msg: "{{ lookup('template', 'supervisor.unit.j2') }}"
+
+- name: Create an unit file
+  vars:
+    programs: '{{ hostvars.values() | list | get_instances_on_machine(ansible_host) }}'
+  template:
+    src: supervisor.unit.j2
+    dest: "/etc/supervisord.d/{{ cartridge_app_name }}.ini"
     owner: root
     group: root
   any_errors_fatal: true
+  # run_once: true
   notify:
-    - reload-systemd-daemon
+    - reload-supervisor-daemon
+
+# - name: Copy an unit-file to /etc/systemd/system/
+#   become: true
+#   copy:
+#     remote_src: true
+#     src: "{{ instance_systemd_path }}{{ instance_systemd_unit_file }}"
+#     dest: "/etc/systemd/system/{{ instance_systemd_unit_file }}"
+#     owner: root
+#     group: root
+#   any_errors_fatal: true
+#   notify:
+#     - reload-systemd-daemon

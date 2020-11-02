@@ -35,6 +35,14 @@ def get_one_not_expelled_instance_for_machine(hostvars, play_hosts):
     return res
 
 
+def get_instances_on_machine(hostvars, ansible_host):
+    res = []
+    for i in hostvars:
+        if i['ansible_host'] == ansible_host:
+            res.append(i)
+    return res
+
+
 def get_one_not_expelled_instance(hostvars, play_hosts):
     for i in play_hosts:
         if is_expelled(hostvars[i]) or is_stateboard(hostvars[i]):
@@ -90,4 +98,5 @@ class FilterModule(object):
             'get_instance_work_dir': get_instance_work_dir,
             'get_instance_systemd_service': get_instance_systemd_service,
             'get_instance_run_dir': get_instance_run_dir,
+            'get_instances_on_machine': get_instances_on_machine,
         }
