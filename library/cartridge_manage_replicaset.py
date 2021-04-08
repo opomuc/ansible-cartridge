@@ -313,13 +313,18 @@ def change_replicaset(control_console, params, cluster_replicaset):
         if s not in cluster_instances:
             errmsg = 'Instance "{}" specified in replicaset "{}" is not in cluster. '.format(s, replicaset_alias) + \
                 'Make sure that it was started.'
-            return ModuleRes(success=False, msg=errmsg)
+            # return ModuleRes(success=False, msg=errmsg)
+            # do not include servers that are not in cluster to the edit_topology call
+            # error happens during master switch on a replicaset with newly created replicas
+            servers_to_join.remove(s)
 
     for s in replicaset_failover_priority:
         if s not in cluster_instances:
             errmsg = 'Instance "{}" specified in replicaset "{}" is not in cluster. '.format(s, replicaset_alias) + \
                 'Make sure that it was started.'
-            return ModuleRes(success=False, msg=errmsg)
+            # return ModuleRes(success=False, msg=errmsg)
+            # do not include servers that are not in cluster to the edit_topology call
+            replicaset_failover_priority.remove(s)
 
     if servers_to_join:
         res, err = edit_replicaset(control_console, cluster_instances,
